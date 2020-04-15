@@ -6,7 +6,7 @@
 
 This is the MMODBUS STM32 LL Library  
 - [x] MODBUS RTU  
-- [] MODBUS ASCII  
+- [ ] MODBUS ASCII  
 
 How to use this Library:
 * Select "General peripheral Initalizion as a pair of '.c/.h' file per peripheral" on project settings.   
