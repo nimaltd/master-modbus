@@ -135,7 +135,8 @@ uint16_t mmodbus_receiveRaw(uint32_t timeout)
     if(HAL_GetTick() - startTime > timeout)
       return 0;
     if((mmodbus.rxIndex > 0) && (HAL_GetTick() - mmodbus.rxTime > 10))
-      return mmodbus.rxIndex;    
+      return mmodbus.rxIndex; 
+    mmodbus_delay(1);  
   }    
 }  
 //##################################################################################################
@@ -148,7 +149,7 @@ bool mmodbus_sendRaw(uint8_t *data, uint16_t size, uint32_t timeout)
   mmodbus.rxIndex = 0;
   uint32_t startTime = HAL_GetTick();
   HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_SET);
-  mmodbus_delay(1);
+  mmodbus_delay(10);
   #if (_MMODBUS_TXDMA == 0)
   for (uint16_t i = 0; i<size; i++)
   {
@@ -191,7 +192,8 @@ bool mmodbus_sendRaw(uint8_t *data, uint16_t size, uint32_t timeout)
     }  
   }
   while (!LL_USART_IsActiveFlag_TC(_MMODBUS_USART))
-    mmodbus_delay(1);      
+    mmodbus_delay(1);  
+  mmodbus_delay(10);  
   #endif
   HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_RESET);
   mmodbus.txBusy = 0;
@@ -211,12 +213,12 @@ bool mmodbus_init(uint32_t timeout)
   return true;
 }
 //##################################################################################################
-bool mmodbus_readCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *coilStatus)
+bool mmodbus_readCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data)
 {
-  return mmodbus_readCoils(slaveAddress, number_0_to_9998, 1, coilStatus);
+  return mmodbus_readCoils(slaveAddress, number_0_to_9998, 1, data);
 }
 //##################################################################################################
-bool mmodbus_readCoils(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *coilsStatus)
+bool mmodbus_readCoils(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data)
 {
   if(startNumber_0_to_9998 > 9998)
     return false;
@@ -243,8 +245,8 @@ bool mmodbus_readCoils(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uin
   crc = mmodbus_crc16(mmodbus.rxBuf, mmodbus.rxBuf[2] + 3);
   if(((crc & 0x00FF) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 3]) || (((crc & 0xFF00) >> 8) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 4]))
     return false; 
-  if(coilsStatus != NULL)
-    memcpy(coilsStatus, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
+  if(data != NULL)
+    memcpy(data, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
   return true;
   #endif
   #if( _MMODBUS_ASCII == 1)
@@ -252,12 +254,12 @@ bool mmodbus_readCoils(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uin
   #endif
 }
 //##################################################################################################
-bool mmodbus_readDiscreteInput(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *discreteInput)
+bool mmodbus_readDiscreteInput(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data)
 {
-  return mmodbus_readDiscreteInputs(slaveAddress, number_0_to_9998, 1, discreteInput); 
+  return mmodbus_readDiscreteInputs(slaveAddress, number_0_to_9998, 1, data); 
 }
 //##################################################################################################
-bool mmodbus_readDiscreteInputs(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *discreteInputs)
+bool mmodbus_readDiscreteInputs(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data)
 {
   if(startNumber_0_to_9998 > 9998)
     return false;
@@ -284,18 +286,200 @@ bool mmodbus_readDiscreteInputs(uint8_t slaveAddress, uint16_t startNumber_0_to_
   crc = mmodbus_crc16(mmodbus.rxBuf, mmodbus.rxBuf[2] + 3);
   if(((crc & 0x00FF) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 3]) || (((crc & 0xFF00) >> 8) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 4]))
     return false; 
-  if(discreteInputs != NULL)
-    memcpy(discreteInputs, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
+  if(data != NULL)
+    memcpy(data, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
   return true;
   #endif
 }
 //##################################################################################################
-bool mmodbus_readHoldingRegister(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *holdingRegister)
+bool mmodbus_readInputRegister32f(uint8_t slaveAddress, uint16_t number_0_to_9998, float *data)
 {
-  return mmodbus_readHoldingRegisters(slaveAddress, number_0_to_9998, 1, holdingRegister); 
+  return mmodbus_readInputRegisters32f(slaveAddress, number_0_to_9998, 1, data); 
 }
 //##################################################################################################
-bool mmodbus_readHoldingRegisters(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *holdingRegisters)
+bool mmodbus_readInputRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, float *data)
+{
+  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  if(ret == true)
+  {
+    for(uint16_t i=0 ; i<length ; i++)
+    {  
+      uint8_t tmp1[4],tmp2[4];
+      memcpy(tmp1, &data[i], 4);       
+      for(uint8_t j=0 ; j<4 ; j++)
+        tmp2[3 - j] = tmp1[j];
+      memcpy(&data[i], tmp2, 4);       
+    }
+    return true;
+  }
+  else
+    return false;
+}
+//##################################################################################################
+bool mmodbus_readInputRegister32i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint32_t *data)
+{
+  return mmodbus_readInputRegisters32i(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readInputRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data)
+{
+  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  if(ret == true)
+  {
+    for(uint16_t i=0 ; i<length ; i++)
+    {  
+      uint8_t tmp1[4],tmp2[4];
+      memcpy(tmp1, &data[i], 4);       
+      for(uint8_t j=0 ; j<4 ; j++)
+        tmp2[3 - j] = tmp1[j];
+      memcpy(&data[i], tmp2, 4);       
+    }
+    return true;
+  }
+  else
+    return false;
+}
+//##################################################################################################
+bool mmodbus_readInputRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data)
+{
+  return mmodbus_readInputRegisters16i(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readInputRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data)
+{
+  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  if(ret == true)
+  {
+    for(uint16_t i=0 ; i<length ; i++)
+    {  
+      uint8_t tmp1[2],tmp2[2];
+      memcpy(tmp1, &data[i], 2);       
+      for(uint8_t j=0 ; j<2 ; j++)
+        tmp2[1 - j] = tmp1[j];
+      memcpy(&data[i], tmp2, 2);       
+    }
+    return true;
+  }
+  else
+    return false;
+}
+//##################################################################################################
+bool mmodbus_readInputRegister8i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data)
+{
+  return mmodbus_readInputRegisters8i(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readInputRegisters8i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data)
+{
+  if(startNumber_0_to_9998 > 9998)
+    return false;
+  #if( _MMODBUS_RTU == 1)
+  uint8_t txData[8];
+  txData[0] = slaveAddress;
+  txData[1] = MModbusCMD_ReadInputRegisters;
+  txData[2] = (startNumber_0_to_9998 & 0xFF00) >> 8;
+  txData[3] = (startNumber_0_to_9998 & 0x00FF);
+  txData[4] = (length & 0xFF00) >> 8;
+  txData[5] = (length & 0x00FF);
+  static uint16_t  crc;
+  crc = mmodbus_crc16(txData, 6);
+  txData[6] = (crc & 0x00FF);
+  txData[7] = (crc & 0xFF00) >> 8;
+  mmodbus_sendRaw(txData, 8, 100);
+  uint16_t recLen = mmodbus_receiveRaw(mmodbus.timeout);
+  if(recLen == 0)
+    return false;
+  if(mmodbus.rxBuf[0] != slaveAddress)
+    return false;
+  if(mmodbus.rxBuf[1] != MModbusCMD_ReadInputRegisters)
+    return false;
+  crc = mmodbus_crc16(mmodbus.rxBuf, mmodbus.rxBuf[2] + 3);
+  if(((crc & 0x00FF) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 3]) || (((crc & 0xFF00) >> 8) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 4]))
+    return false;  
+  if(data != NULL)
+    memcpy(data, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
+  return true;
+  #endif
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegister32f(uint8_t slaveAddress, uint16_t number_0_to_9998, float *data)
+{
+  return mmodbus_readHoldingRegisters32f(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, float *data)
+{
+  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  if(ret == true)
+  {
+    for(uint16_t i=0 ; i<length ; i++)
+    {  
+      uint8_t tmp1[4],tmp2[4];
+      memcpy(tmp1, &data[i], 4);       
+      for(uint8_t j=0 ; j<4 ; j++)
+        tmp2[3 - j] = tmp1[j];
+      memcpy(&data[i], tmp2, 4);       
+    }
+    return true;
+  }
+  else
+    return false;
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegister32i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint32_t *data)
+{
+  return mmodbus_readHoldingRegisters32i(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data)
+{
+  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  if(ret == true)
+  {
+    for(uint16_t i=0 ; i<length ; i++)
+    {  
+      uint8_t tmp1[4],tmp2[4];
+      memcpy(tmp1, &data[i], 4);       
+      for(uint8_t j=0 ; j<4 ; j++)
+        tmp2[3 - j] = tmp1[j];
+      memcpy(&data[i], tmp2, 4);       
+    }
+    return true;
+  }
+  else
+    return false;
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegister6i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data)
+{
+  return mmodbus_readHoldingRegisters16i(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data)
+{
+  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  if(ret == true)
+  {
+    for(uint16_t i=0 ; i<length ; i++)
+    {  
+      uint8_t tmp1[2],tmp2[2];
+      memcpy(tmp1, &data[i], 2);       
+      for(uint8_t j=0 ; j<2 ; j++)
+        tmp2[1 - j] = tmp1[j];
+      memcpy(&data[i], tmp2, 2);       
+    }
+    return true;
+  }
+  else
+    return false;
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegister8i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data)
+{
+  return mmodbus_readHoldingRegisters8i(slaveAddress, number_0_to_9998, 1, data); 
+}
+//##################################################################################################
+bool mmodbus_readHoldingRegisters8i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data)
 {
   if(startNumber_0_to_9998 > 9998)
     return false;
@@ -322,7 +506,7 @@ bool mmodbus_readHoldingRegisters(uint8_t slaveAddress, uint16_t startNumber_0_t
   crc = mmodbus_crc16(mmodbus.rxBuf, mmodbus.rxBuf[2] + 3);
   if(((crc & 0x00FF) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 3]) || (((crc & 0xFF00) >> 8) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 4]))
     return false; 
-  if(holdingRegisters != NULL)
+  if(data != NULL)
   {
     for(uint8_t i=0 ; i<mmodbus.rxBuf[2] ; i+=2)
     {    
@@ -330,59 +514,13 @@ bool mmodbus_readHoldingRegisters(uint8_t slaveAddress, uint16_t startNumber_0_t
       mmodbus.rxBuf[i+3] = mmodbus.rxBuf[i+3+1];
       mmodbus.rxBuf[i+3+1] = H;      
     }
-    memcpy(holdingRegisters, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
+    memcpy(data, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
   }
   return true;
   #endif
 }
 //##################################################################################################
-bool mmodbus_readInputRegister(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *inputRegister)
-{
-  return mmodbus_readInputRegisters(slaveAddress, number_0_to_9998, 1, inputRegister); 
-}
-//##################################################################################################
-bool mmodbus_readInputRegisters(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *inputRegisters)
-{
-  if(startNumber_0_to_9998 > 9998)
-    return false;
-  #if( _MMODBUS_RTU == 1)
-  uint8_t txData[8];
-  txData[0] = slaveAddress;
-  txData[1] = MModbusCMD_ReadInputRegisters;
-  txData[2] = (startNumber_0_to_9998 & 0xFF00) >> 8;
-  txData[3] = (startNumber_0_to_9998 & 0x00FF);
-  txData[4] = (length & 0xFF00) >> 8;
-  txData[5] = (length & 0x00FF);
-  static uint16_t  crc;
-  crc = mmodbus_crc16(txData, 6);
-  txData[6] = (crc & 0x00FF);
-  txData[7] = (crc & 0xFF00) >> 8;
-  mmodbus_sendRaw(txData, 8, 100);
-  uint16_t recLen = mmodbus_receiveRaw(mmodbus.timeout);
-  if(recLen == 0)
-    return false;
-  if(mmodbus.rxBuf[0] != slaveAddress)
-    return false;
-  if(mmodbus.rxBuf[1] != MModbusCMD_ReadInputRegisters)
-    return false;
-  crc = mmodbus_crc16(mmodbus.rxBuf, mmodbus.rxBuf[2] + 3);
-  if(((crc & 0x00FF) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 3]) || (((crc & 0xFF00) >> 8) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 4]))
-    return false; 
-  if(inputRegisters != NULL)
-  {
-    for(uint8_t i=0 ; i<mmodbus.rxBuf[2] ; i+=2)
-    {    
-      uint8_t H = mmodbus.rxBuf[i+3];
-      mmodbus.rxBuf[i+3] = mmodbus.rxBuf[i+3+1];
-      mmodbus.rxBuf[i+3+1] = H;      
-    }
-    memcpy(inputRegisters, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
-  }
-  return true;
-  #endif
-}
-//##################################################################################################
-bool mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t coilStatus)
+bool mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t data)
 {
   if(number_0_to_9998 > 9998)
     return false;
@@ -392,7 +530,7 @@ bool mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t 
   txData[1] = MModbusCMD_WriteSingleCoil;
   txData[2] = (number_0_to_9998 & 0xFF00) >> 8;
   txData[3] = (number_0_to_9998 & 0x00FF);
-  if(coilStatus == 0)
+  if(data == 0)
     txData[4] = 0;
   else
     txData[4] = 0xFF;
@@ -415,7 +553,7 @@ bool mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t 
   #endif
 }
 //##################################################################################################
-bool mmodbus_writeHoldingRegister(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t holdingRegister)
+bool mmodbus_writeHoldingRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t data)
 {
   if(number_0_to_9998 > 9998)
     return false;
@@ -425,8 +563,8 @@ bool mmodbus_writeHoldingRegister(uint8_t slaveAddress, uint16_t number_0_to_999
   txData[1] = MModbusCMD_WriteSingleRegister;
   txData[2] = (number_0_to_9998 & 0xFF00) >> 8;
   txData[3] = (number_0_to_9998 & 0x00FF);
-  txData[4] = (holdingRegister & 0xFF00) >> 8;
-  txData[5] = holdingRegister & 0x00FF;
+  txData[4] = (data & 0xFF00) >> 8;
+  txData[5] = data & 0x00FF;
   static uint16_t  crc;
   crc = mmodbus_crc16(txData, 6);
   txData[6] = (crc & 0x00FF);
