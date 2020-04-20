@@ -450,7 +450,7 @@ bool mmodbus_readHoldingRegisters32i(uint8_t slaveAddress, uint16_t startNumber_
     return false;
 }
 //##################################################################################################
-bool mmodbus_readHoldingRegister6i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data)
+bool mmodbus_readHoldingRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data)
 {
   return mmodbus_readHoldingRegisters16i(slaveAddress, number_0_to_9998, 1, data); 
 }
