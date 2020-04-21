@@ -8,9 +8,12 @@
   Instagram:  http://instagram.com/github.NimaLTD
   Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
   
-  Version:    1.1.1
+  Version:    1.1.2
   
   Reversion History:
+  
+  (1.1.2)
+  fix read holding register
   
   (1.1.1)
   fix functions name

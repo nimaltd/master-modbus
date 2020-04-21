@@ -409,7 +409,7 @@ bool mmodbus_readHoldingRegister32f(uint8_t slaveAddress, uint16_t number_0_to_9
 //##################################################################################################
 bool mmodbus_readHoldingRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, float *data)
 {
-  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  bool ret = mmodbus_readHoldingRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
   if(ret == true)
   {
     for(uint16_t i=0 ; i<length ; i++)
@@ -433,7 +433,7 @@ bool mmodbus_readHoldingRegister32i(uint8_t slaveAddress, uint16_t number_0_to_9
 //##################################################################################################
 bool mmodbus_readHoldingRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data)
 {
-  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  bool ret = mmodbus_readHoldingRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
   if(ret == true)
   {
     for(uint16_t i=0 ; i<length ; i++)
@@ -457,7 +457,7 @@ bool mmodbus_readHoldingRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9
 //##################################################################################################
 bool mmodbus_readHoldingRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data)
 {
-  bool ret = mmodbus_readInputRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
+  bool ret = mmodbus_readHoldingRegisters8i(slaveAddress, startNumber_0_to_9998, length * 4, (uint8_t*)data);
   if(ret == true)
   {
     for(uint16_t i=0 ; i<length ; i++)
