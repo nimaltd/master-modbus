@@ -8,9 +8,12 @@
   Instagram:  http://instagram.com/github.NimaLTD
   Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
   
-  Version:    1.1.2
+  Version:    1.2.0
   
   Reversion History:
+  
+  (1.2.0)
+  add read 32bit register order
   
   (1.1.2)
   fix read holding register
@@ -56,16 +59,26 @@ typedef enum
   
 }MModbusCMD_t;
 
+typedef enum
+{
+  MModBus_32bitOrder_ABCD = 0,
+  MModBus_32bitOrder_DCBA,
+  MModBus_32bitOrder_BADC,
+  MModBus_32bitOrder_CDAB,  
+  
+}MModBus_32bitOrder_t;
+
 typedef struct
 {
-  uint16_t  rxIndex;  
-  uint8_t   rxBuf[_MMODBUS_RXSIZE];
-  uint32_t  rxTime;
-  uint8_t   txBusy;
+  uint16_t              rxIndex;  
+  uint8_t               rxBuf[_MMODBUS_RXSIZE];
+  uint32_t              rxTime;
+  uint8_t               txBusy;
+  uint32_t              timeout; 
+  MModBus_32bitOrder_t  byteOrder;
   #if (_MMODBUS_TXDMA == 1)
-  uint8_t   txDmaDone;
-  #endif
-  uint32_t  timeout;  
+  uint8_t             txDmaDone;
+  #endif  
   
 }MModBus_t;
 
@@ -74,7 +87,7 @@ typedef struct
 void    mmodbus_callback(void);
 void    mmodbus_callback_txDMA(void);
 bool    mmodbus_init(uint32_t setTimeout);
-
+void    mmodbus_set32bitOrder(MModBus_32bitOrder_t MModBus_32bitOrder_);
 //  coils numbers 00001 to 09999
 bool    mmodbus_readCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data);
 bool    mmodbus_readCoils(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data);
@@ -88,8 +101,6 @@ bool    mmodbus_readInputRegister32i(uint8_t slaveAddress, uint16_t number_0_to_
 bool    mmodbus_readInputRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data);
 bool    mmodbus_readInputRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data);
 bool    mmodbus_readInputRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data);
-bool    mmodbus_readInputRegister8i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data);
-bool    mmodbus_readInputRegisters8i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data);
 //  holding register 40001 to 49999
 bool    mmodbus_readHoldingRegister32f(uint8_t slaveAddress, uint16_t number_0_to_9998, float *data);
 bool    mmodbus_readHoldingRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, float *data);
@@ -97,8 +108,6 @@ bool    mmodbus_readHoldingRegister32i(uint8_t slaveAddress, uint16_t number_0_t
 bool    mmodbus_readHoldingRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data);
 bool    mmodbus_readHoldingRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data);
 bool    mmodbus_readHoldingRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data);
-bool    mmodbus_readHoldingRegister8i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data);
-bool    mmodbus_readHoldingRegisters8i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data);
 // coils numbers 00001 to 09999
 bool    mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t data);
 //  holding register 40001 to 49999
