@@ -8,6 +8,17 @@ This is the MMODBUS STM32 LL Library
 - [x] support MODBUS RTU  
 - [ ] support MODBUS ASCII  
 
+Tested platform
+- [ ] STM32F0  
+- [ ] STM32F1  
+- [ ] STM32F2  
+- [x] STM32F4  
+- [ ] STM32F7  
+- [ ] STM32L0  
+- [ ] STM32L1  
+- [ ] STM32L4  
+
+
 How to use this Library:
 * Select "General peripheral Initalizion as a pair of '.c/.h' file per peripheral" on project settings.   
 * Enable USART and enable interrupt.   
