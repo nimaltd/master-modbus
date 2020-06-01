@@ -5,7 +5,7 @@
 #define _MMODBUS_RTU              1
 #define _MMODBUS_ASCII            0 //  not implemented yet
 #define _MMODBUS_USART            USART1             
-#define _MMODBUS_RXSIZE           256  
+#define _MMODBUS_RXSIZE           64  
 #define _MMODBUS_TXDMA            1   
 #if     _MMODBUS_TXDMA == 1
 #define _MMODBUS_DMA              DMA2

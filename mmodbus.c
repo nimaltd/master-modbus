@@ -149,12 +149,13 @@ bool mmodbus_sendRaw(uint8_t *data, uint16_t size, uint32_t timeout)
   mmodbus.rxIndex = 0;
   uint32_t startTime = HAL_GetTick();
   HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_SET);
-  mmodbus_delay(10);
+  mmodbus_delay(1);
   #if (_MMODBUS_TXDMA == 0)
-  for (uint16_t i = 0; i<size; i++)
+  for (uint16_t i = 0; i < size; i++)
   {
     while (!LL_USART_IsActiveFlag_TXE(_MMODBUS_USART))
     {
+      mmodbus_delay(1);
       if(HAL_GetTick() - startTime > timeout)
       {
         HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_RESET);
@@ -162,25 +163,27 @@ bool mmodbus_sendRaw(uint8_t *data, uint16_t size, uint32_t timeout)
         return false;
       }   
     }
+    LL_USART_ClearFlag_TC(_MMODBUS_USART);
     LL_USART_TransmitData8(_MMODBUS_USART, data[i]);
-  }
+  }  
   while (!LL_USART_IsActiveFlag_TC(_MMODBUS_USART))
   {
+    mmodbus_delay(1);
     if(HAL_GetTick() - startTime > timeout)
     {
       HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_RESET);
       mmodbus.txBusy = 0;
       return false;
-    }  
+    }    
   }
   #else
-  LL_USART_ClearFlag_TC(_MMODBUS_USART);
   mmodbus.txDmaDone = 0;
   LL_DMA_ConfigAddresses(_MMODBUS_DMA, _MMODBUS_DMASTREAM,\
     (uint32_t)data, LL_USART_DMA_GetRegAddr(_MMODBUS_USART),\
     LL_DMA_GetDataTransferDirection(_MMODBUS_DMA, _MMODBUS_DMASTREAM));
   LL_DMA_SetDataLength(_MMODBUS_DMA, _MMODBUS_DMASTREAM, size);
   LL_DMA_EnableStream(_MMODBUS_DMA, _MMODBUS_DMASTREAM);
+  LL_USART_ClearFlag_TC(_MMODBUS_USART);
   while(mmodbus.txDmaDone == 0)
   {
     mmodbus_delay(1);
@@ -192,8 +195,7 @@ bool mmodbus_sendRaw(uint8_t *data, uint16_t size, uint32_t timeout)
     }  
   }
   while (!LL_USART_IsActiveFlag_TC(_MMODBUS_USART))
-    mmodbus_delay(1);  
-  mmodbus_delay(10);  
+    mmodbus_delay(1);   
   #endif
   HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_RESET);
   mmodbus.txBusy = 0;

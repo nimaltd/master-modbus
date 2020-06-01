@@ -8,21 +8,24 @@
   Instagram:  http://instagram.com/github.NimaLTD
   Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
   
-  Version:    1.2.0
+  Version:    1.2.1
   
   Reversion History:
   
+  (1.2.1)
+  bug fixed.
+  
   (1.2.0)
-  add read 32bit register order
+  add read 32bit register order.
   
   (1.1.2)
-  fix read holding register
+  fix read holding register.
   
   (1.1.1)
-  fix functions name
+  fix functions name.
   
   (1.1.0)
-  add 16bit,32bit,float read  
+  add 16bit,32bit,float read.
   
   (1.0.1)
   add delay in receive routin.
