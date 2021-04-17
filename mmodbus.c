@@ -71,7 +71,6 @@ void mmodbus_callback(void)
   mmodbus.rxTime = HAL_GetTick();
 }
 //#####################################################################################################
-
 void  mmodbus_callback_txDMA(void)
 {
   #if _MMODBUS_TXDMA == 1
@@ -215,9 +214,14 @@ bool mmodbus_init(uint32_t timeout)
   return true;
 }
 //##################################################################################################
+void mmodbus_set16bitOrder(MModBus_16bitOrder_t MModBus_16bitOrder_)
+{
+  mmodbus.byteOrder16 = MModBus_16bitOrder_;
+}
+//##################################################################################################
 void mmodbus_set32bitOrder(MModBus_32bitOrder_t MModBus_32bitOrder_)
 {
-  mmodbus.byteOrder = MModBus_32bitOrder_;
+  mmodbus.byteOrder32 = MModBus_32bitOrder_;
 }
 //##################################################################################################
 bool mmodbus_readCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data)
@@ -345,7 +349,7 @@ bool mmodbus_readInputRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_
     for(uint16_t i=0 ; i<length ; i++)
     {  
       uint8_t tmp1[4],tmp2[4];
-      switch(mmodbus.byteOrder)
+      switch(mmodbus.byteOrder32)
       {
         case MModBus_32bitOrder_DCBA:
           memcpy(tmp1, &data[i], 4);       
@@ -404,11 +408,22 @@ bool mmodbus_readInputRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_
   {
     uint8_t tmp1[2],tmp2[2];
     for(uint16_t i=0 ; i<length ; i++)
-    {        
-      memcpy(tmp1, &data[i], 2);       
-      tmp2[0] = tmp1[1];
-      tmp2[1] = tmp1[0];
-      memcpy(&data[i], tmp2, 2);       
+    {   
+      switch(mmodbus.byteOrder16)
+      {
+        case MModBus_16bitOrder_AB:
+          memcpy(tmp1, &data[i], 2);       
+          tmp2[0] = tmp1[0];
+          tmp2[1] = tmp1[1];
+          memcpy(&data[i], tmp2, 2);    
+        break;
+        default:
+          memcpy(tmp1, &data[i], 2);       
+          tmp2[0] = tmp1[1];
+          tmp2[1] = tmp1[0];
+          memcpy(&data[i], tmp2, 2);    
+        break;
+      }
     }
     return true;
   }
@@ -470,7 +485,7 @@ bool mmodbus_readHoldingRegisters32f(uint8_t slaveAddress, uint16_t startNumber_
     for(uint16_t i=0 ; i<length ; i++)
     {  
       uint8_t tmp1[4],tmp2[4];
-      switch(mmodbus.byteOrder)
+      switch(mmodbus.byteOrder32)
       {
         case MModBus_32bitOrder_DCBA:
           memcpy(tmp1, &data[i], 4);       
@@ -529,11 +544,22 @@ bool mmodbus_readHoldingRegisters16i(uint8_t slaveAddress, uint16_t startNumber_
   {
     uint8_t tmp1[2],tmp2[2];
     for(uint16_t i=0 ; i<length ; i++)
-    {        
-      memcpy(tmp1, &data[i], 2);       
-      tmp2[0] = tmp1[1];
-      tmp2[1] = tmp1[0];
-      memcpy(&data[i], tmp2, 2);       
+    {   
+      switch(mmodbus.byteOrder16)
+      {
+        case MModBus_16bitOrder_AB:
+          memcpy(tmp1, &data[i], 2);       
+          tmp2[0] = tmp1[0];
+          tmp2[1] = tmp1[1];
+          memcpy(&data[i], tmp2, 2);    
+        break;
+        default:
+          memcpy(tmp1, &data[i], 2);       
+          tmp2[0] = tmp1[1];
+          tmp2[1] = tmp1[0];
+          memcpy(&data[i], tmp2, 2);    
+        break;
+      }
     }
     return true;
   }

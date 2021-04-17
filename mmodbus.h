@@ -8,9 +8,12 @@
   Instagram:  http://instagram.com/github.NimaLTD
   Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
   
-  Version:    1.2.1
+  Version:    1.3.0
   
   Reversion History:
+  
+  (1.3.0)
+  Add 16 bit order
   
   (1.2.1)
   bug fixed.
@@ -64,6 +67,13 @@ typedef enum
 
 typedef enum
 {
+  MModBus_16bitOrder_AB = 0,
+  MModBus_16bitOrder_BA,
+  
+}MModBus_16bitOrder_t;
+
+typedef enum
+{
   MModBus_32bitOrder_ABCD = 0,
   MModBus_32bitOrder_DCBA,
   MModBus_32bitOrder_BADC,
@@ -78,7 +88,8 @@ typedef struct
   uint32_t              rxTime;
   uint8_t               txBusy;
   uint32_t              timeout; 
-  MModBus_32bitOrder_t  byteOrder;
+  MModBus_16bitOrder_t  byteOrder16;
+  MModBus_32bitOrder_t  byteOrder32;
   #if (_MMODBUS_TXDMA == 1)
   uint8_t             txDmaDone;
   #endif  
@@ -90,6 +101,7 @@ typedef struct
 void    mmodbus_callback(void);
 void    mmodbus_callback_txDMA(void);
 bool    mmodbus_init(uint32_t setTimeout);
+void    mmodbus_set16bitOrder(MModBus_16bitOrder_t MModBus_16bitOrder_);
 void    mmodbus_set32bitOrder(MModBus_32bitOrder_t MModBus_32bitOrder_);
 //  coils numbers 00001 to 09999
 bool    mmodbus_readCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data);
