@@ -68,6 +68,10 @@ void mmodbus_callback(void)
     else
       LL_USART_ReceiveData8(_MMODBUS_USART);      
   }
+  else
+  {
+    LL_USART_ClearFlag_RXNE(_MMODBUS_USART);
+  }
   mmodbus.rxTime = HAL_GetTick();
 }
 //#####################################################################################################
@@ -167,7 +171,6 @@ bool mmodbus_sendRaw(uint8_t *data, uint16_t size, uint32_t timeout)
   }  
   while (!LL_USART_IsActiveFlag_TC(_MMODBUS_USART))
   {
-    mmodbus_delay(1);
     if(HAL_GetTick() - startTime > timeout)
     {
       HAL_GPIO_WritePin(_MMODBUS_CTRL_GPIO, _MMODBUS_CTRL_PIN, GPIO_PIN_RESET);

@@ -8,9 +8,12 @@
   Instagram:  http://instagram.com/github.NimaLTD
   Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
   
-  Version:    1.3.0
+  Version:    1.3.1
   
   Reversion History:
+  
+  (1.3.1)
+  Remove delay in sending function when DMA is disabled
   
   (1.3.0)
   Add 16 bit order
