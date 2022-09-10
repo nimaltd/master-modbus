@@ -8,10 +8,13 @@
   Instagram:  http://instagram.com/github.NimaLTD
   Youtube:    https://www.youtube.com/channel/UCUhY7qY1klJm1d2kulr9ckw
   
-  Version:    1.3.1
+  Version:    1.3.2
   
   Reversion History:
   
+  (1.3.2)
+  Speedup receiver, add write multiple holding
+    
   (1.3.1)
   Remove delay in sending function when DMA is disabled
   
@@ -107,29 +110,30 @@ bool    mmodbus_init(uint32_t setTimeout);
 void    mmodbus_set16bitOrder(MModBus_16bitOrder_t MModBus_16bitOrder_);
 void    mmodbus_set32bitOrder(MModBus_32bitOrder_t MModBus_32bitOrder_);
 //  coils numbers 00001 to 09999
-bool    mmodbus_readCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data);
-bool    mmodbus_readCoils(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data);
+bool    mmodbus_readCoil(uint8_t slaveAddress, uint16_t number, uint8_t *data);
+bool    mmodbus_readCoils(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint8_t *data);
 //  discrete input 10001 to 19999
-bool    mmodbus_readDiscreteInput(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t *data);
-bool    mmodbus_readDiscreteInputs(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint8_t *data);
+bool    mmodbus_readDiscreteInput(uint8_t slaveAddress, uint16_t number, uint8_t *data);
+bool    mmodbus_readDiscreteInputs(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint8_t *data);
 //  input register 30001 to 39999
-bool    mmodbus_readInputRegister32f(uint8_t slaveAddress, uint16_t number_0_to_9998, float *data);
-bool    mmodbus_readInputRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, float *data);
-bool    mmodbus_readInputRegister32i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint32_t *data);
-bool    mmodbus_readInputRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data);
-bool    mmodbus_readInputRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data);
-bool    mmodbus_readInputRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data);
+bool    mmodbus_readInputRegister32f(uint8_t slaveAddress, uint16_t number, float *data);
+bool    mmodbus_readInputRegisters32f(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, float *data);
+bool    mmodbus_readInputRegister32i(uint8_t slaveAddress, uint16_t number, uint32_t *data);
+bool    mmodbus_readInputRegisters32i(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint32_t *data);
+bool    mmodbus_readInputRegister16i(uint8_t slaveAddress, uint16_t number, uint16_t *data);
+bool    mmodbus_readInputRegisters16i(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint16_t *data);
 //  holding register 40001 to 49999
-bool    mmodbus_readHoldingRegister32f(uint8_t slaveAddress, uint16_t number_0_to_9998, float *data);
-bool    mmodbus_readHoldingRegisters32f(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, float *data);
-bool    mmodbus_readHoldingRegister32i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint32_t *data);
-bool    mmodbus_readHoldingRegisters32i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint32_t *data);
-bool    mmodbus_readHoldingRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t *data);
-bool    mmodbus_readHoldingRegisters16i(uint8_t slaveAddress, uint16_t startNumber_0_to_9998, uint16_t length, uint16_t *data);
+bool    mmodbus_readHoldingRegister32f(uint8_t slaveAddress, uint16_t number, float *data);
+bool    mmodbus_readHoldingRegisters32f(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, float *data);
+bool    mmodbus_readHoldingRegister32i(uint8_t slaveAddress, uint16_t number, uint32_t *data);
+bool    mmodbus_readHoldingRegisters32i(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint32_t *data);
+bool    mmodbus_readHoldingRegister16i(uint8_t slaveAddress, uint16_t number, uint16_t *data);
+bool    mmodbus_readHoldingRegisters16i(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint16_t *data);
 // coils numbers 00001 to 09999
-bool    mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number_0_to_9998, uint8_t data);
+bool    mmodbus_writeCoil(uint8_t slaveAddress, uint16_t number, uint8_t data);
 //  holding register 40001 to 49999
-bool    mmodbus_writeHoldingRegister16i(uint8_t slaveAddress, uint16_t number_0_to_9998, uint16_t data);
+bool    mmodbus_writeHoldingRegister16i(uint8_t slaveAddress, uint16_t number, uint16_t data);
+bool    mmodbus_writeHoldingRegisters16i(uint8_t slaveAddress, uint16_t startnumber, uint16_t length, uint16_t *data);
 
 //##################################################################################################
 #endif
