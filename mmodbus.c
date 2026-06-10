@@ -454,15 +454,7 @@ bool mmodbus_readHoldingRegisters8i(uint8_t slaveAddress, uint16_t startnumber, 
   if(((crc & 0x00FF) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 3]) || (((crc & 0xFF00) >> 8) != mmodbus.rxBuf[mmodbus.rxBuf[2] + 4]))
     return false; 
   if(data != NULL)
-  {
-    for(uint8_t i=0 ; i<mmodbus.rxBuf[2] ; i+=2)
-    {    
-      uint8_t H = mmodbus.rxBuf[i+3];
-      mmodbus.rxBuf[i+3] = mmodbus.rxBuf[i+3+1];
-      mmodbus.rxBuf[i+3+1] = H;      
-    }
     memcpy(data, &mmodbus.rxBuf[3], mmodbus.rxBuf[2]);   
-  }
   return true;
   #endif
 }
